@@ -1,0 +1,377 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String         @id @default(auto()) @map("_id") @db.ObjectId
+  email             String         @unique
+  password          String
+  name              String
+  bio               String?
+  role              UserRole
+  profilePic        String?
+  skills            String[]
+  tokens            Int            @default(0)
+  badges            UserBadge[]
+  workshopsHosted   Workshop[]     @relation("HostedWorkshops")
+  workshopsAttended UserWorkshop[]
+  jobPosts          Job[]          @relation("EmployerJobs")
+  openSourceProjects OpenSourceProject[] @relation("EmployerOpenSourceProjects")
+  applications      Application[]  @relation("StudentApplications")
+  userContracts     Contract[]     @relation("UserContracts")
+  employerContracts Contract[]     @relation("EmployerContracts")
+  reviewsGiven      Review[]       @relation("Reviewer")
+  reviewsReceived   Review[]       @relation("ReviewTarget")
+  createdAt         DateTime       @default(now())
+  studentInvites    JobInvite[]    @relation("StudentInvites")
+  employerInvites    JobInvite[]   @relation("EmployerInvites")
+  raisedDisputes    Dispute[]    @relation("RaisedDisputes")
+  respondedDisputes Dispute[]    @relation("RespondedDisputes")
+  votes             Vote[]       @relation("Votes")
+  votedFor          Vote[]       @relation("VotedFor")
+  wonDisputes       DisputeResolution[] @relation("WonDisputes")
+  resolvedDisputes  DisputeResolution[] @relation("ResolvedDisputes")
+  tokenRewards      TokenReward[]
+
+  @@index([skills])
+  @@index([tokens])
+}
+
+model UserBadge {
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  user    User   @relation(fields: [userId], references: [id])
+  userId  String @db.ObjectId
+  badge   Badge  @relation(fields: [badgeId], references: [id])
+  badgeId String @db.ObjectId
+
+  @@unique([userId, badgeId])
+}
+
+model UserWorkshop {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String   @db.ObjectId
+  workshop   Workshop @relation(fields: [workshopId], references: [id])
+  workshopId String   @db.ObjectId
+  attendedAt DateTime @default(now())
+
+  @@unique([userId, workshopId])
+}
+
+enum UserRole {
+  STUDENT
+  EMPLOYER
+  ADMIN
+}
+
+model Badge {
+  id          String      @id @default(auto()) @map("_id") @db.ObjectId
+  name        String      @unique
+  description String?
+  iconUrl     String?
+  tier        BadgeTier
+  users       UserBadge[]
+
+  @@index([tier])
+}
+
+enum BadgeTier {
+  SHIKSHARTHI
+  SIKSHA_SEVI
+  UTSAAHI_INTERN
+  ACHARYA
+  GURU
+}
+
+model Job {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  title           String
+  subtitle        String?  // Added for job subtitle
+  description     String
+  requiredSkills  String[]
+  tags            String[]
+  type            JobType  // Changed to enum
+  location        String
+  locationType    String   // Added for remote/hybrid/onsite
+  budget          String?  // Added for job budget
+  status          JobStatus @default(OPEN)
+  isVerified      Boolean  @default(false)
+  employerId      String   @db.ObjectId
+  employer        User     @relation("EmployerJobs", fields: [employerId], references: [id])
+  applications    Application[]
+  contracts       Contract[]
+  reviews         Review[] @relation("JobReviews")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  postedTime      String?  // Added for frontend display
+  proposals       Int      @default(0) // Added for tracking number of proposals
+  aiMatch         Float?   // Added for AI matching score
+  invites         JobInvite[]
+
+  @@unique([title, employerId])
+  @@index([employerId])
+  @@index([status])
+  @@index([type])
+  @@index([locationType])
+}
+
+enum JobType {
+  FULL_TIME
+  PART_TIME
+  INTERNSHIP
+  FREELANCE
+  CONTRACT
+}
+
+enum JobStatus {
+  OPEN
+  CLOSED
+  DRAFT
+}
+
+model Application {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  job       Job       @relation(fields: [jobId], references: [id])
+  jobId     String    @db.ObjectId
+  student   User      @relation("StudentApplications", fields: [studentId], references: [id])
+  studentId String    @db.ObjectId
+  proposal  String
+  status    AppStatus @default(PENDING)
+  createdAt DateTime  @default(now())
+
+  @@unique([jobId, studentId])
+  @@index([jobId])
+  @@index([studentId])
+  @@index([status])
+}
+
+enum AppStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+model Workshop {
+  id           String         @id @default(auto()) @map("_id") @db.ObjectId
+  title        String
+  description  String
+  zoomLink     String
+  price        Float
+  host         User           @relation("HostedWorkshops", fields: [hostId], references: [id])
+  hostId       String         @db.ObjectId
+  attendees    UserWorkshop[]
+  reviews      Review[]       @relation("WorkshopReviews")
+  tokensEarned Int            @default(0)
+  skillsTaught String[]
+  status       WorkshopStatus @default(UPCOMING)
+  startDate    DateTime
+  endDate      DateTime
+  totalSeats   Int
+  outcomes     String[]
+  rules        String[]
+  zoomStatus   String?        // Optional field for status message
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@index([hostId])
+  @@index([skillsTaught])
+  @@index([status])
+  @@index([startDate])
+  @@index([endDate])
+}
+
+enum WorkshopStatus {
+  UPCOMING
+  ONGOING
+  COMPLETED
+  CANCELLED
+}
+
+model Contract {
+  id              String         @id @default(auto()) @map("_id") @db.ObjectId
+  student         User           @relation("UserContracts", fields: [studentId], references: [id])
+  studentId       String         @db.ObjectId
+  employer        User           @relation("EmployerContracts", fields: [employerId], references: [id])
+  employerId      String         @db.ObjectId
+  job             Job            @relation(fields: [jobId], references: [id])
+  jobId           String         @db.ObjectId
+  agreementHash   String
+  blockchainHash  String?        // The SHA-256 hash of the agreement document
+  transactionHash String?        // The blockchain transaction hash
+  status          ContractStatus @default(PENDING)
+  createdAt       DateTime       @default(now())
+  completedAt     DateTime?
+  disputes        Dispute[]
+  employerCompleted Boolean      @default(false)
+  studentCompleted  Boolean      @default(false)
+  completionNote   String?
+
+  @@index([studentId])
+  @@index([employerId])
+  @@index([jobId])
+  @@index([status])
+}
+
+model Review {
+  id         String     @id @default(auto()) @map("_id") @db.ObjectId
+  reviewer   User       @relation("Reviewer", fields: [reviewerId], references: [id])
+  reviewerId String     @db.ObjectId
+
+  target     User?      @relation("ReviewTarget", fields: [targetId], references: [id])
+  targetId   String?    @db.ObjectId
+
+  workshop   Workshop?  @relation("WorkshopReviews", fields: [workshopId], references: [id])
+  workshopId String?    @db.ObjectId
+
+  job        Job?       @relation("JobReviews", fields: [jobId], references: [id])
+  jobId      String?    @db.ObjectId
+
+  rating     Int
+  comment    String?
+  createdAt  DateTime   @default(now())
+
+  @@unique([reviewerId, workshopId])
+  @@unique([reviewerId, jobId])
+}
+
+enum ContractStatus {
+  PENDING
+  ACTIVE
+  COMPLETED
+  DISPUTED
+}
+
+model OpenSourceProject {
+  id                    String   @id @default(auto()) @map("_id") @db.ObjectId
+  title                 String
+  description           String
+  fullDescription       String
+  techStack            String[]
+  difficulty           String    // Changed from ProjectDifficulty to String
+  goals                String[]
+  githubUrl            String
+  hiringLabel          String?
+  contributionGuidelines String
+  goodFirstIssues      String[]
+  employerId           String   @db.ObjectId
+  employer             User     @relation("EmployerOpenSourceProjects", fields: [employerId], references: [id])
+  status               ProjectStatus @default(OPEN)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@index([employerId])
+  @@index([status])
+  @@index([difficulty])
+}
+
+enum ProjectStatus {
+  OPEN
+  CLOSED
+  DRAFT
+}
+
+enum ProjectDifficulty {
+  EASY
+  INTERMEDIATE
+  ADVANCED
+}
+
+model JobInvite {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  jobId     String   @db.ObjectId
+  studentId String   @db.ObjectId
+  employerId String  @db.ObjectId
+  status    String   @default("PENDING") // PENDING, ACCEPTED, REJECTED
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  job      Job    @relation(fields: [jobId], references: [id])
+  student  User   @relation("StudentInvites", fields: [studentId], references: [id])
+  employer User   @relation("EmployerInvites", fields: [employerId], references: [id])
+
+  @@unique([jobId, studentId])
+  @@index([studentId])
+  @@index([employerId])
+}
+
+model Dispute {
+  id              String         @id @default(auto()) @map("_id") @db.ObjectId
+  contract        Contract       @relation(fields: [contractId], references: [id])
+  contractId      String         @db.ObjectId
+  raisedBy        User           @relation("RaisedDisputes", fields: [raisedById], references: [id])
+  raisedById      String         @db.ObjectId
+  reason          String
+  evidence        String
+  response        String?
+  respondedBy     User?          @relation("RespondedDisputes", fields: [respondedById], references: [id])
+  respondedById   String?        @db.ObjectId
+  blockchainHash  String         // Hash of dispute data for immutability
+  status          DisputeStatus  @default(OPEN)
+  votes           Vote[]
+  resolution      DisputeResolution?
+  tokenRewards    TokenReward[]  @relation("TokenRewards")
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@index([contractId])
+  @@index([raisedById])
+  @@index([respondedById])
+  @@index([status])
+}
+
+model Vote {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  dispute   Dispute  @relation(fields: [disputeId], references: [id])
+  disputeId String   @db.ObjectId
+  voter     User     @relation("Votes", fields: [voterId], references: [id])
+  voterId   String   @db.ObjectId
+  votedFor  User     @relation("VotedFor", fields: [votedForId], references: [id])
+  votedForId String  @db.ObjectId
+  weight    Int      @default(1)
+  createdAt DateTime @default(now())
+
+  @@unique([disputeId, voterId])
+  @@index([disputeId])
+  @@index([voterId])
+  @@index([votedForId])
+}
+
+model DisputeResolution {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  dispute   Dispute  @relation(fields: [disputeId], references: [id])
+  disputeId String   @db.ObjectId
+  winner    User     @relation("WonDisputes", fields: [winnerId], references: [id])
+  winnerId  String   @db.ObjectId
+  resolver  User     @relation("ResolvedDisputes", fields: [resolverId], references: [id])
+  resolverId String  @db.ObjectId
+  createdAt DateTime @default(now())
+
+  @@unique([disputeId])
+  @@index([winnerId])
+  @@index([resolverId])
+}
+
+model TokenReward {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String   @db.ObjectId
+  amount    Int
+  reason    String
+  dispute   Dispute? @relation("TokenRewards", fields: [disputeId], references: [id])
+  disputeId String?  @db.ObjectId
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([disputeId])
+}
+
+enum DisputeStatus {
+  OPEN
+  RESPONDED
+  RESOLVED
+}

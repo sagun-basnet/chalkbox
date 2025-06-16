@@ -1,0 +1,22 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "ChalkBox API",
+    "description": "API documentation for ChalkBox application",
+    "version": "1.0.0"
+  },
+  "host": "localhost:3000",
+  "basePath": "/",
+  "schemes": [
+    "http"
+  ],
+  "securityDefinitions": {
+    "bearerAuth": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "Authorization",
+      "description": "Enter your bearer token in the format **Bearer <token>**"
+    }
+  },
+  "paths": {}
+}
