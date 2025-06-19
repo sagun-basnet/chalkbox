@@ -1,133 +1,112 @@
-# ChalkBox - Job and Workshop Platform
-
-ChalkBox is a comprehensive platform that connects students with job opportunities and educational workshops. The platform uses AI-based recommendations to match users with relevant jobs and workshops based on their skills.
+# ChalkBox — Job & Workshop Platform
 
 
-## Tech Stack
+A peer-to-peer platform connecting students with jobs and workshops using **AI recommendations**, **Web3 contracts**, and a **token-based incentive system**.
+
+---
+
+## 🚀 Features
+
+- **AI-Based Matching**: Matches users to jobs/workshops based on skills.
+- **Peer Learning**: Workshops organized by students, for students.
+- **Open Source Projects**: Hands-on learning after workshops.
+- **Token System**: Earn tokens for engagement and growth.
+- **Smart Contracts**: Web3-based job agreements between students and employers.
+- **Decentralized Voting**: Resolve disputes via proof-based voting.
+
+---
+
+## ⚙️ Tech Stack
 
 ### Backend
-- Node.js with Express
+- Node.js + Express
 - TypeScript
-- Prisma ORM
 - MongoDB
+- Prisma ORM
 
 ### Frontend
 - React
 - TypeScript
+- Vite
 - React Router
 
-## Getting Started
+---
+
+## 🧪 Getting Started
 
 ### Prerequisites
-- Node.js (v14 or higher)
+- Node.js v14+
 - MongoDB
-- pnpm (recommended) or npm
+- `pnpm` or `npm`
 
-### Installation
+---
 
-1. Clone the repository:
+### Clone & Install
+
 ```bash
-git clone https://github.com/nischaljs/iicquest.git
-cd iicquest
+git clone https://github.com/nischaljs/chalkbox.git
+cd chalkbox
+
+# Install backend & frontend deps
+cd backend && pnpm install
+cd ../frontend && pnpm install
 ```
 
-2. Install dependencies:
-```bash
-# Backend
-cd backend
-pnpm install
+---
 
-# Frontend
-cd ../frontend
-pnpm install
-```
+### Setup Environment
 
-3. Set up environment variables:
-```bash
-# Backend (.env)
-DATABASE_URL="mongodb://localhost:27017/iicquest"
-JWT_SECRET="your-jwt-secret"
+#### Backend `.env`
+```env
+DATABASE_URL="mongodb://localhost:27017/chalkbox"
+JWT_SECRET="your-secret"
 PORT=5000
+```
 
-# Frontend (.env)
+#### Frontend `.env`
+```env
 VITE_API_URL="http://localhost:5000"
 ```
 
-4. Run database migrations:
+---
+
+### DB Setup
+
 ```bash
 cd backend
 pnpm prisma generate
-```
-
-5. Seed the database:
-```bash
 pnpm prisma db seed
 ```
 
-6. Start the development servers:
+---
+
+### Run Dev Servers
+
 ```bash
 # Backend
-cd backend
-pnpm dev
+cd backend && pnpm dev
 
 # Frontend
-cd frontend
-pnpm dev
+cd frontend && pnpm dev
 ```
 
-## Seeded Users
+---
 
-The database comes pre-seeded with multiple users for testing different scenarios:
+## 👥 Seeded Users
 
-### Admin
-- Email: admin@chalkbox.com
-- Password: password123
-- Role: ADMIN
-- Bio: Platform administrator
-- Skills: JavaScript, TypeScript, Node.js, React, MongoDB
-- Tokens: 1000
-- Profile Picture: /profiles/admin.png
+| Name         | Email              | Role     | Badge             | Tokens |
+|--------------|--------------------|----------|-------------------|--------|
+| Admin        | admin@chalkbox.com | ADMIN    | N/A               | 1000   |
+| Tech Employer| employer@chalkbox.com | EMPLOYER | GURU              | 500    |
+| Startup Founder | startup@chalkbox.com | EMPLOYER | SIKSHA_SEVI     | 300    |
+| Ram Sharma   | ram@chalkbox.com   | STUDENT  | UTSAAHI_INTERN    | 100    |
+| Sita Thapa   | sita@chalkbox.com  | STUDENT  | UTSAAHI_INTERN    | 50     |
 
-### Employers
-1. Tech Employer
-   - Email: employer@chalkbox.com
-   - Password: password123
-   - Role: EMPLOYER
-   - Bio: Senior tech lead with 10+ years experience
-   - Badge: GURU
-   - Skills: System Design, Architecture, Team Leadership
-   - Tokens: 500
-   - Profile Picture: /profiles/employer.png
+*Passwords: `password123`*
 
-2. Startup Founder
-   - Email: startup@chalkbox.com
-   - Password: password123
-   - Role: EMPLOYER
-   - Bio: Entrepreneur passionate about tech education
-   - Badge: SIKSHA_SEVI
-   - Skills: Product Management, Agile, Startup
-   - Tokens: 300
-   - Profile Picture: /profiles/startup.png
+---
 
-### Students
-1. Ram Sharma
-   - Email: ram@chalkbox.com
-   - Password: password123
-   - Role: STUDENT
-   - Bio: Passionate about web development
-   - Badge: UTSAAHI_INTERN
-   - Skills: JavaScript, React, Node.js
-   - Tokens: 100
-   - Profile Picture: /profiles/ram.png
-   - History: React workshop attendance, Active contract for Backend Intern
+## 🏁This is a much-improved project Built By Our Team Trionerd @ IICQuest 3.0  
+Role: Backend & Blockchain + AI Integration
 
-2. Sita Thapa
-   - Email: sita@chalkbox.com
-   - Password: password123
-   - Role: STUDENT
-   - Bio: Frontend developer in training
-   - Badge: UTSAAHI_INTERN
-   - Skills: HTML, CSS, JavaScript, React
-   - Tokens: 50
-   - Profile Picture: /profiles/sita.png
-   - History: React workshop attendance, Pending application for Frontend Intern
+Made with ❤️ during a 36-hour hackathon!
